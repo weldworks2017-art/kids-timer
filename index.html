@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ねるまでタイマー＆やることリスト</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- ヘッダー・設定 -->
+        <header>
+            <h1>ねるまで あと...</h1>
+            <button id="settings-btn" class="icon-btn">⚙️</button>
+        </header>
+
+        <!-- 砂時計エリア -->
+        <div id="hourglass-container" class="hourglass-wrapper">
+            <!-- JSで動的に砂時計が生成されます -->
+        </div>
+
+        <!-- やることリストエリア -->
+        <div class="lists-container">
+            <div class="list-card combined-list">
+                <!-- ヘッダー行 -->
+                <div class="task-row header-row">
+                    <div class="col-task">やること</div>
+                    <div class="col-check avatar-header">👦<br><span contenteditable="true" id="name1" spellcheck="false">AK</span></div>
+                    <div class="col-check avatar-header">👧<br><span contenteditable="true" id="name2" spellcheck="false">DI</span></div>
+                </div>
+
+                <!-- タスク行 -->
+                <div class="task-row">
+                    <div class="col-task">お風呂</div>
+                    <div class="col-check checkbox-wrapper" data-id="AK-bath"><div class="checkbox"></div></div>
+                    <div class="col-check checkbox-wrapper" data-id="DI-bath"><div class="checkbox"></div></div>
+                </div>
+                <div class="task-row">
+                    <div class="col-task">ご飯</div>
+                    <div class="col-check checkbox-wrapper" data-id="AK-dinner"><div class="checkbox"></div></div>
+                    <div class="col-check checkbox-wrapper" data-id="DI-dinner"><div class="checkbox"></div></div>
+                </div>
+                <div class="task-row">
+                    <div class="col-task">明日の用意</div>
+                    <div class="col-check checkbox-wrapper" data-id="AK-prep"><div class="checkbox"></div></div>
+                    <div class="col-check checkbox-wrapper" data-id="DI-prep"><div class="checkbox"></div></div>
+                </div>
+                <div class="task-row">
+                    <div class="col-task">歯磨き</div>
+                    <div class="col-check checkbox-wrapper" data-id="AK-teeth"><div class="checkbox"></div></div>
+                    <div class="col-check checkbox-wrapper" data-id="DI-teeth"><div class="checkbox"></div></div>
+                </div>
+                <div class="task-row">
+                    <div class="col-task">ミッション</div>
+                    <div class="col-check checkbox-wrapper" data-id="AK-mission"><div class="checkbox"></div></div>
+                    <div class="col-check checkbox-wrapper" data-id="DI-mission"><div class="checkbox"></div></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 全て完了した時のゲーム時間の案内 -->
+        <div id="game-time-notice" class="hidden">
+            🎉 ぜんぶおわったよ！ゲームできるね！ 🎮
+        </div>
+    </div>
+
+    <!-- 設定モーダル（普段は非表示） -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>設定</h2>
+            <label>ねる時間 (デフォルト 21:00)</label>
+            <input type="time" id="target-time-input" value="21:00">
+            <div class="modal-actions">
+                <button id="save-settings" class="btn primary">保存</button>
+                <button id="close-settings" class="btn secondary">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- お祝いのアニメーション用キャンバス -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="script.js"></script>
+</body>
+</html>
