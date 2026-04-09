@@ -1,86 +1,1085 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ねるまでタイマー＆やることリスト</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bedtime Routine Timer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== RESET & VARIABLES ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0f4ff;
+      --card: #ffffff;
+      --primary: #ff7eb3;
+      --primary-dark: #e85da0;
+      --accent: #7ec8e3;
+      --accent2: #ffe066;
+      --green: #52c78a;
+      --green-dark: #3aad74;
+      --text: #2d2d3a;
+      --text-muted: #8888aa;
+      --sand: #ffc75f;
+      --sand-dark: #e8a020;
+      --radius: 20px;
+      --shadow: 0 6px 24px rgba(0,0,0,0.10);
+      --shadow-sm: 0 2px 10px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 14px 14px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(120deg, #ff7eb3 0%, #a78bfa 100%);
+      padding: 14px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      color: #fff;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 900;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      letter-spacing: 0.02em;
+    }
+
+    .header-btns { display: flex; gap: 8px; }
+
+    .icon-btn {
+      background: rgba(255,255,255,0.25);
+      border: none;
+      border-radius: 12px;
+      font-size: 1.3rem;
+      width: 40px; height: 40px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .icon-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.08); }
+    .icon-btn:active { transform: scale(0.94); }
+
+    /* ===== HOURGLASS SECTION ===== */
+    .timer-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .time-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .time-remaining-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .time-remaining-value {
+      font-size: 2.6rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff7eb3, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .time-remaining-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* hourglass row */
+    .hourglass-row {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .hg-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .hg-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* SVG hourglass */
+    .hg-svg {
+      width: 56px;
+      height: 80px;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.12));
+      transition: transform 0.3s;
+    }
+    .hg-svg:hover { transform: scale(1.07); }
+
+    /* Sand fill paths are set via JS clip-paths */
+    .hg-glass-top { fill: rgba(167,139,250,0.15); stroke: #a78bfa; stroke-width: 2.5; }
+    .hg-glass-bottom { fill: rgba(167,139,250,0.15); stroke: #a78bfa; stroke-width: 2.5; }
+    .hg-sand-top { fill: url(#sandGrad); }
+    .hg-sand-bottom { fill: url(#sandGrad2); }
+    .hg-neck { fill: none; stroke: #a78bfa; stroke-width: 2.5; }
+    .hg-stream { fill: #ffc75f; opacity: 0; }
+    .hg-stream.flowing { opacity: 1; animation: hgFlow 0.8s ease-in-out infinite alternate; }
+    @keyframes hgFlow {
+      0% { transform: scaleY(0.7) translateY(-2px); opacity: 0.5; }
+      100% { transform: scaleY(1.1) translateY(2px); opacity: 1; }
+    }
+
+    /* shimmer overlay */
+    .hg-shimmer {
+      fill: none;
+      stroke: rgba(255,255,255,0.55);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    /* ===== TASK LIST ===== */
+    .list-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .list-header {
+      display: grid;
+      grid-template-columns: 1fr 52px 52px;
+      align-items: center;
+      padding: 10px 14px 8px;
+      background: linear-gradient(120deg, #ffe0ec 0%, #e8dcff 100%);
+      border-bottom: 2px solid #f0e8ff;
+    }
+
+    .list-header-task {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .avatar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+    }
+
+    .avatar-emoji { font-size: 1.45rem; line-height: 1; }
+    .avatar-name {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #6b5ea8;
+    }
+
+    /* task rows */
+    .task-row {
+      display: grid;
+      grid-template-columns: 1fr 52px 52px;
+      align-items: center;
+      padding: 7px 14px;
+      border-bottom: 1.5px dashed #f0e8ff;
+      transition: background 0.25s;
+      position: relative;
+    }
+    .task-row:last-child { border-bottom: none; }
+    .task-row.all-done {
+      background: #f8fff8;
+    }
+    .task-row.all-done .task-label {
+      color: #b0c4c0;
+      text-decoration: line-through;
+    }
+
+    .task-label {
+      font-size: 1.05rem;
+      font-weight: 700;
+      transition: color 0.25s;
+    }
+
+    .check-col {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .checkbox-wrapper {
+      cursor: pointer;
+      padding: 7px;
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      border-radius: 50%;
+    }
+
+    .checkbox {
+      width: 32px; height: 32px;
+      border: 3px solid #d0c8f0;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      background: #fff;
+    }
+
+    .checkbox-wrapper:active .checkbox { transform: scale(0.88); }
+
+    .checkbox-wrapper.checked .checkbox {
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-color: var(--green);
+      box-shadow: 0 3px 10px rgba(82,199,138,0.4);
+    }
+
+    .checkbox-wrapper.checked .checkbox::before {
+      content: '✓';
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 900;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0) rotate(-20deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(82,199,138,0.3);
+      transform: scale(0);
+      animation: rippleAnim 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim {
+      to { transform: scale(3.5); opacity: 0; }
+    }
+
+    /* ===== COMPLETION NOTICE ===== */
+    #completion-notice {
+      background: linear-gradient(135deg, #ffd194, #70e1f5);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.3rem;
+      box-shadow: var(--shadow);
+      animation: bounceIn 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    .completion-emoji { font-size: 2.5rem; display: block; margin-bottom: 6px; }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      60% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    .hidden { display: none !important; }
+
+    /* ===== MODAL BASE ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20,10,40,0.55);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal-box {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 24px 22px;
+      width: 92%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 1.1rem;
+      font-family: inherit;
+      font-weight: 700;
+      border: 2.5px solid #e8e0ff;
+      border-radius: 12px;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+      color: var(--text);
+    }
+    .modal-input:focus { border-color: #a78bfa; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 11px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary {
+      background: linear-gradient(135deg, #ff7eb3, #a78bfa);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(167,139,250,0.4);
+    }
+    .btn-secondary { background: #f0ecff; color: #6b5ea8; }
+    .btn-danger { background: #ffe0e0; color: #cc3333; }
+
+    /* ===== EDIT MODE MODAL ===== */
+    .edit-modal-box {
+      max-width: 440px;
+      max-height: 90vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .edit-task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .edit-task-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8f4ff;
+      border-radius: 12px;
+      padding: 8px 10px;
+      transition: background 0.2s;
+    }
+    .edit-task-item:hover { background: #ede8ff; }
+
+    .drag-handle {
+      cursor: grab;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .edit-task-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      font-family: inherit;
+      font-weight: 700;
+      color: var(--text);
+      outline: none;
+      padding: 2px 4px;
+    }
+    .edit-task-input:focus {
+      border-bottom: 2px solid #a78bfa;
+    }
+
+    .delete-task-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: #ccc;
+      padding: 2px 4px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      flex-shrink: 0;
+    }
+    .delete-task-btn:hover { color: #e05050; background: #ffe0e0; }
+
+    .add-task-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: 2.5px dashed #c8b8ff;
+      color: #a78bfa;
+      font-size: 1rem;
+      font-family: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 12px;
+      width: 100%;
+      transition: background 0.2s;
+      margin-bottom: 14px;
+    }
+    .add-task-btn:hover { background: #f0e8ff; }
+
+    /* ===== CONFETTI CANVAS ===== */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 380px) {
+      .time-remaining-value { font-size: 2rem; }
+      .hg-svg { width: 46px; height: 68px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- ヘッダー・設定 -->
-        <header>
-            <h1>ねるまで あと...</h1>
-            <button id="settings-btn" class="icon-btn">⚙️</button>
-        </header>
+<div class="app">
 
-        <!-- 砂時計エリア -->
-        <div id="hourglass-container" class="hourglass-wrapper">
-            <!-- JSで動的に砂時計が生成されます -->
-        </div>
-
-        <!-- やることリストエリア -->
-        <div class="lists-container">
-            <div class="list-card combined-list">
-                <!-- ヘッダー行 -->
-                <div class="task-row header-row">
-                    <div class="col-task">やること</div>
-                    <div class="col-check avatar-header">👦<br><span contenteditable="true" id="name1" spellcheck="false">AK</span></div>
-                    <div class="col-check avatar-header">👧<br><span contenteditable="true" id="name2" spellcheck="false">DI</span></div>
-                </div>
-
-                <!-- タスク行 -->
-                <div class="task-row">
-                    <div class="col-task">お風呂</div>
-                    <div class="col-check checkbox-wrapper" data-id="AK-bath"><div class="checkbox"></div></div>
-                    <div class="col-check checkbox-wrapper" data-id="DI-bath"><div class="checkbox"></div></div>
-                </div>
-                <div class="task-row">
-                    <div class="col-task">ご飯</div>
-                    <div class="col-check checkbox-wrapper" data-id="AK-dinner"><div class="checkbox"></div></div>
-                    <div class="col-check checkbox-wrapper" data-id="DI-dinner"><div class="checkbox"></div></div>
-                </div>
-                <div class="task-row">
-                    <div class="col-task">明日の用意</div>
-                    <div class="col-check checkbox-wrapper" data-id="AK-prep"><div class="checkbox"></div></div>
-                    <div class="col-check checkbox-wrapper" data-id="DI-prep"><div class="checkbox"></div></div>
-                </div>
-                <div class="task-row">
-                    <div class="col-task">歯磨き</div>
-                    <div class="col-check checkbox-wrapper" data-id="AK-teeth"><div class="checkbox"></div></div>
-                    <div class="col-check checkbox-wrapper" data-id="DI-teeth"><div class="checkbox"></div></div>
-                </div>
-                <div class="task-row">
-                    <div class="col-task">ミッション</div>
-                    <div class="col-check checkbox-wrapper" data-id="AK-mission"><div class="checkbox"></div></div>
-                    <div class="col-check checkbox-wrapper" data-id="DI-mission"><div class="checkbox"></div></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 全て完了した時のゲーム時間の案内 -->
-        <div id="game-time-notice" class="hidden">
-            🎉 ぜんぶおわったよ！ゲームできるね！ 🎮
-        </div>
+  <!-- HEADER -->
+  <header>
+    <h1>🌙 Bedtime Routine</h1>
+    <div class="header-btns">
+      <button class="icon-btn" id="edit-btn" title="Edit Tasks">✏️</button>
+      <button class="icon-btn" id="settings-btn" title="Settings">⚙️</button>
     </div>
+  </header>
 
-    <!-- 設定モーダル（普段は非表示） -->
-    <div id="settings-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2>設定</h2>
-            <label>ねる時間 (デフォルト 21:00)</label>
-            <input type="time" id="target-time-input" value="21:00">
-            <div class="modal-actions">
-                <button id="save-settings" class="btn primary">保存</button>
-                <button id="close-settings" class="btn secondary">閉じる</button>
-            </div>
-        </div>
+  <!-- TIMER CARD -->
+  <div class="timer-card">
+    <div class="time-display">
+      <span class="time-remaining-label">Time Until Bedtime</span>
+      <span class="time-remaining-value" id="time-remaining-value">--:--</span>
+      <span class="time-remaining-sub" id="time-remaining-sub">calculating...</span>
     </div>
+    <div class="hourglass-row" id="hourglass-row">
+      <!-- Hourglasses injected by JS -->
+    </div>
+  </div>
 
-    <!-- お祝いのアニメーション用キャンバス -->
-    <canvas id="confetti-canvas"></canvas>
+  <!-- TASK LIST CARD -->
+  <div class="list-card">
+    <div class="list-header">
+      <div class="list-header-task">Task</div>
+      <div class="avatar-col">
+        <span class="avatar-emoji">👧</span>
+        <span class="avatar-name" id="name1-display">Girl</span>
+      </div>
+      <div class="avatar-col">
+        <span class="avatar-emoji">👦</span>
+        <span class="avatar-name" id="name2-display">Boy</span>
+      </div>
+    </div>
+    <div id="task-list-body">
+      <!-- Task rows injected by JS -->
+    </div>
+  </div>
 
-    <script src="script.js"></script>
+  <!-- COMPLETION NOTICE -->
+  <div id="completion-notice" class="hidden">
+    <span class="completion-emoji">🎉</span>
+    All done! Game time! 🎮✨
+  </div>
+
+</div><!-- .app -->
+
+<!-- CONFETTI CANVAS -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="modal-overlay hidden" id="settings-modal">
+  <div class="modal-box">
+    <div class="modal-title">⚙️ Settings</div>
+    <label class="modal-label" for="target-time-input">Bedtime</label>
+    <input class="modal-input" type="time" id="target-time-input" value="21:00" />
+    <label class="modal-label" for="name1-input">👧 Girl's Name</label>
+    <input class="modal-input" type="text" id="name1-input" placeholder="Girl" maxlength="10" />
+    <label class="modal-label" for="name2-input">👦 Boy's Name</label>
+    <input class="modal-input" type="text" id="name2-input" placeholder="Boy" maxlength="10" />
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="close-settings">Cancel</button>
+      <button class="btn btn-primary" id="save-settings">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT TASKS MODAL ===== -->
+<div class="modal-overlay hidden" id="edit-modal">
+  <div class="modal-box edit-modal-box">
+    <div class="modal-title">✏️ Edit Tasks</div>
+    <div class="edit-task-list" id="edit-task-list">
+      <!-- Injected by JS -->
+    </div>
+    <button class="add-task-btn" id="add-task-btn">＋ Add Task</button>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="close-edit">Cancel</button>
+      <button class="btn btn-primary" id="save-edit">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const DEFAULT_TASKS = [
+  'Toilet',
+  'Bathtime',
+  'Dinner',
+  'Prep for tomorrow',
+  'Brush teeth',
+  'Mission 1',
+  'Mission 2',
+];
+const NUM_PLAYERS = 2;
+
+let targetTimeStr   = localStorage.getItem('targetTime') || '21:00';
+let name1           = localStorage.getItem('name1') || 'Girl';
+let name2           = localStorage.getItem('name2') || 'Boy';
+let tasks           = JSON.parse(localStorage.getItem('tasks') || 'null') || DEFAULT_TASKS.slice();
+
+// Daily reset
+const todayStr = new Date().toDateString();
+if (localStorage.getItem('lastDate') !== todayStr) {
+  localStorage.removeItem('checks');
+  localStorage.setItem('lastDate', todayStr);
+}
+let checks = JSON.parse(localStorage.getItem('checks') || '{}');
+
+/* ============================================================
+   HOURGLASS SVG RENDERER
+============================================================ */
+function buildHourglassSVG(topFraction, index) {
+  // topFraction: 1.0 = full top (lots of time), 0.0 = empty top (this hour done)
+  const W = 56, H = 80;
+  const neckY = H / 2;       // vertical center = neck
+  const glassW = 34;
+  const glassH = 32;
+  const neckW  = 5;
+  const cx     = W / 2;
+
+  // top chamber: trapezoid  wider at top, narrows to neck
+  // bottom chamber: trapezoid wider at bottom, narrows to neck
+  // Using polygon points
+  const topTL = { x: cx - glassW/2, y: 4 };
+  const topTR = { x: cx + glassW/2, y: 4 };
+  const topBL = { x: cx - neckW/2,  y: neckY };
+  const topBR = { x: cx + neckW/2,  y: neckY };
+
+  const botTL = { x: cx - neckW/2,  y: neckY };
+  const botTR = { x: cx + neckW/2,  y: neckY };
+  const botBL = { x: cx - glassW/2, y: H - 4 };
+  const botBR = { x: cx + glassW/2, y: H - 4 };
+
+  const pts = (arr) => arr.map(p => `${p.x},${p.y}`).join(' ');
+
+  // Sand in top: fill from bottom of top chamber up by topFraction
+  // clip to top chamber polygon
+  const topSandH = glassH * topFraction;  // height of sand in top (fill from bottom)
+  const topSandY = neckY - topSandH;
+
+  // The top chamber spans from y=4 to y=neckY (height = neckY - 4)
+  // Sand fills the lower topFraction of that space
+  // The width of the sand at a given y interpolates between glassW (at y=4) and neckW (at y=neckY)
+  const topChamberH = neckY - 4;
+  function topWidthAtY(y) {
+    const t = (y - 4) / topChamberH; // 0 at top, 1 at bottom
+    return neckW + (glassW - neckW) * (1 - t);
+  }
+
+  // For the sand shape in the top, it's a trapezoid from topSandY to neckY
+  const sandTopW = topWidthAtY(topSandY);
+  const sandNeckW = neckW;
+  const topSandPts = [
+    { x: cx - sandTopW/2,  y: topSandY },
+    { x: cx + sandTopW/2,  y: topSandY },
+    { x: cx + sandNeckW/2, y: neckY },
+    { x: cx - sandNeckW/2, y: neckY },
+  ];
+
+  // Sand in bottom: inverted, fills from bottom up by (1 - topFraction)
+  const botFraction = 1 - topFraction;
+  const botSandH = glassH * botFraction;
+  const botSandTopY = (H - 4) - botSandH;
+  const botChamberH = (H - 4) - neckY;
+  function botWidthAtY(y) {
+    const t = (y - neckY) / botChamberH; // 0 at top, 1 at bottom
+    return neckW + (glassW - neckW) * t;
+  }
+  const sandBotTopW = botWidthAtY(botSandTopY);
+  const sandBotBotW = glassW;
+  const botSandPts = [
+    { x: cx - sandBotTopW/2, y: botSandTopY },
+    { x: cx + sandBotTopW/2, y: botSandTopY },
+    { x: cx + sandBotBotW/2, y: H - 4 },
+    { x: cx - sandBotBotW/2, y: H - 4 },
+  ];
+
+  const isFlowing = topFraction > 0 && topFraction < 1;
+
+  const gradId1 = `sg1_${index}`;
+  const gradId2 = `sg2_${index}`;
+  const hgNeck = 2; // pixel margin
+
+  return `
+<svg class="hg-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="${gradId1}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="100%" stop-color="#ffa040"/>
+    </linearGradient>
+    <linearGradient id="${gradId2}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffc840"/>
+      <stop offset="100%" stop-color="#ff8c00"/>
+    </linearGradient>
+    <filter id="glow_${index}" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Glass outline top -->
+  <polygon points="${pts([topTL,topTR,topBR,topBL])}"
+    fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="2.2"
+    stroke-linejoin="round"/>
+
+  <!-- Glass outline bottom -->
+  <polygon points="${pts([botTL,botTR,botBR,botBL])}"
+    fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="2.2"
+    stroke-linejoin="round"/>
+
+  <!-- Sand top -->
+  ${topFraction > 0.01 ? `<polygon points="${pts(topSandPts)}" fill="url(#${gradId1})" filter="url(#glow_${index})" opacity="0.92"/>` : ''}
+
+  <!-- Sand bottom -->
+  ${botFraction > 0.01 ? `<polygon points="${pts(botSandPts)}" fill="url(#${gradId2})" opacity="0.92"/>` : ''}
+
+  <!-- Neck connector -->
+  <line x1="${cx}" y1="${neckY - 2}" x2="${cx}" y2="${neckY + 2}" stroke="#a78bfa" stroke-width="2.2"/>
+
+  <!-- Sand stream -->
+  ${isFlowing ? `<rect class="hg-stream flowing" x="${cx - 1.5}" y="${neckY - 2}" width="3" height="15" rx="1.5"/>` : ''}
+
+  <!-- Glass shimmer -->
+  <line class="hg-shimmer" x1="${cx - glassW/2 + 5}" y1="10" x2="${cx - neckW/2 + 2}" y2="${neckY - 4}"/>
+</svg>`;
+}
+
+/* ============================================================
+   HOURGLASS UPDATE
+============================================================ */
+function updateHourglasses() {
+  const now = new Date();
+  const [th, tm] = targetTimeStr.split(':').map(Number);
+  const target = new Date();
+  target.setHours(th, tm, 0, 0);
+
+  // If target time is before now, assume it's for the next day
+  if (target < now) {
+    target.setDate(target.getDate() + 1);
+  }
+
+  let diffMs   = target - now;
+  let diffMins = Math.max(0, Math.floor(diffMs / 60000));
+
+  // Display remaining time
+  const valEl = document.getElementById('time-remaining-value');
+  const subEl = document.getElementById('time-remaining-sub');
+  if (diffMins <= 0) {
+    valEl.textContent = '0:00';
+    subEl.textContent = 'Bedtime! 🌙';
+  } else {
+    const h = Math.floor(diffMins / 60);
+    const m = diffMins % 60;
+    valEl.textContent = h > 0 ? `${h}h ${m.toString().padStart(2,'0')}m` : `${m}m`;
+    subEl.textContent = `until ${targetTimeStr} bedtime`;
+  }
+
+  // 4 hourglasses each = 1 hour
+  const row = document.getElementById('hourglass-row');
+  let html = '';
+  for (let i = 4; i >= 1; i--) {
+    const minBound = (i - 1) * 60;
+    let frac = 0;
+    if (diffMins >= i * 60)        frac = 1;
+    else if (diffMins <= minBound) frac = 0;
+    else                            frac = (diffMins - minBound) / 60;
+
+    html += `<div class="hg-wrap">
+      ${buildHourglassSVG(frac, i)}
+      <span class="hg-label">${i}h</span>
+    </div>`;
+  }
+  row.innerHTML = html;
+}
+
+/* ============================================================
+   TASK LIST RENDERER
+============================================================ */
+function getCheckKey(taskIdx, player) {
+  return `t${taskIdx}_p${player}`;
+}
+
+function renderTaskList() {
+  const body = document.getElementById('task-list-body');
+  const totalBoxes = tasks.length * NUM_PLAYERS;
+  let html = '';
+
+  tasks.forEach((taskName, i) => {
+    const c0 = checks[getCheckKey(i, 0)];
+    const c1 = checks[getCheckKey(i, 1)];
+    const allDone = c0 && c1;
+    html += `
+    <div class="task-row${allDone ? ' all-done' : ''}" data-row="${i}">
+      <span class="task-label">${escapeHtml(taskName)}</span>
+      <div class="check-col">
+        <div class="checkbox-wrapper${c0 ? ' checked' : ''}"
+             data-task="${i}" data-player="0">
+          <div class="checkbox"></div>
+        </div>
+      </div>
+      <div class="check-col">
+        <div class="checkbox-wrapper${c1 ? ' checked' : ''}"
+             data-task="${i}" data-player="1">
+          <div class="checkbox"></div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  body.innerHTML = html;
+  attachCheckboxListeners();
+  updateCompletionNotice();
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function attachCheckboxListeners() {
+  document.querySelectorAll('.checkbox-wrapper').forEach(el => {
+    el.addEventListener('click', (e) => {
+      createRipple(e, el);
+      const ti = parseInt(el.dataset.task);
+      const pi = parseInt(el.dataset.player);
+      const key = getCheckKey(ti, pi);
+      checks[key] = !checks[key];
+      if (!checks[key]) delete checks[key];
+      localStorage.setItem('checks', JSON.stringify(checks));
+
+      // Toggle UI immediately
+      el.classList.toggle('checked', !!checks[key]);
+      const row = document.querySelector(`.task-row[data-row="${ti}"]`);
+      const allDone = !!checks[getCheckKey(ti,0)] && !!checks[getCheckKey(ti,1)];
+      row.classList.toggle('all-done', allDone);
+      row.querySelector('.task-label').style.textDecoration = allDone ? 'line-through' : '';
+      row.querySelector('.task-label').style.color = allDone ? '#b0c4c0' : '';
+
+      updateCompletionNotice();
+    });
+  });
+}
+
+function updateCompletionNotice() {
+  const total = tasks.length * NUM_PLAYERS;
+  const done  = Object.keys(checks).filter(k => checks[k]).length;
+  const notice = document.getElementById('completion-notice');
+  if (done >= total && total > 0) {
+    notice.classList.remove('hidden');
+    fireConfetti();
+  } else {
+    notice.classList.add('hidden');
+  }
+}
+
+function createRipple(event, el) {
+  const old = el.querySelector('.ripple');
+  if (old) old.remove();
+  const circle = document.createElement('span');
+  const d = Math.max(el.clientWidth, el.clientHeight);
+  const r = el.getBoundingClientRect();
+  circle.style.width = circle.style.height = d + 'px';
+  circle.style.left = (event.clientX - r.left - d/2) + 'px';
+  circle.style.top  = (event.clientY - r.top  - d/2) + 'px';
+  circle.classList.add('ripple');
+  el.appendChild(circle);
+}
+
+/* ============================================================
+   NAME DISPLAY
+============================================================ */
+function updateNameDisplay() {
+  document.getElementById('name1-display').textContent = name1;
+  document.getElementById('name2-display').textContent = name2;
+}
+
+/* ============================================================
+   SETTINGS MODAL
+============================================================ */
+document.getElementById('settings-btn').addEventListener('click', () => {
+  document.getElementById('target-time-input').value = targetTimeStr;
+  document.getElementById('name1-input').value = name1;
+  document.getElementById('name2-input').value = name2;
+  document.getElementById('settings-modal').classList.remove('hidden');
+});
+document.getElementById('close-settings').addEventListener('click', () => {
+  document.getElementById('settings-modal').classList.add('hidden');
+});
+document.getElementById('save-settings').addEventListener('click', () => {
+  targetTimeStr = document.getElementById('target-time-input').value || '21:00';
+  name1 = document.getElementById('name1-input').value.trim() || 'Girl';
+  name2 = document.getElementById('name2-input').value.trim() || 'Boy';
+  localStorage.setItem('targetTime', targetTimeStr);
+  localStorage.setItem('name1', name1);
+  localStorage.setItem('name2', name2);
+  updateNameDisplay();
+  updateHourglasses();
+  document.getElementById('settings-modal').classList.add('hidden');
+});
+document.getElementById('settings-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('settings-modal'))
+    document.getElementById('settings-modal').classList.add('hidden');
+});
+
+/* ============================================================
+   EDIT TASKS MODAL
+============================================================ */
+let editingTasks = [];
+
+function openEditModal() {
+  editingTasks = tasks.slice();
+  renderEditList();
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function renderEditList() {
+  const container = document.getElementById('edit-task-list');
+  container.innerHTML = editingTasks.map((t, i) => `
+    <div class="edit-task-item" data-idx="${i}">
+      <span class="drag-handle" title="Drag to reorder">⠿</span>
+      <input class="edit-task-input" type="text"
+             value="${escapeHtml(t)}"
+             placeholder="Task name"
+             data-idx="${i}" />
+      <button class="delete-task-btn" data-idx="${i}" title="Delete">✕</button>
+    </div>
+  `).join('');
+
+  // Input changes
+  container.querySelectorAll('.edit-task-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      editingTasks[parseInt(inp.dataset.idx)] = inp.value;
+    });
+  });
+  // Delete buttons
+  container.querySelectorAll('.delete-task-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      editingTasks.splice(idx, 1);
+      renderEditList();
+    });
+  });
+
+  // Simple drag-and-drop
+  addDragAndDrop(container);
+}
+
+function addDragAndDrop(container) {
+  let dragSrc = null;
+  container.querySelectorAll('.edit-task-item').forEach(item => {
+    item.draggable = true;
+    item.addEventListener('dragstart', (e) => {
+      dragSrc = item;
+      item.style.opacity = '0.45';
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.style.opacity = '';
+      container.querySelectorAll('.edit-task-item').forEach(i => i.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (item !== dragSrc) item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (dragSrc && dragSrc !== item) {
+        const allItems = [...container.querySelectorAll('.edit-task-item')];
+        const srcIdx = allItems.indexOf(dragSrc);
+        const dstIdx = allItems.indexOf(item);
+        const moved = editingTasks.splice(srcIdx, 1)[0];
+        editingTasks.splice(dstIdx, 0, moved);
+        renderEditList();
+      }
+    });
+  });
+}
+
+document.getElementById('edit-btn').addEventListener('click', openEditModal);
+document.getElementById('close-edit').addEventListener('click', () => {
+  document.getElementById('edit-modal').classList.add('hidden');
+});
+document.getElementById('edit-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('edit-modal'))
+    document.getElementById('edit-modal').classList.add('hidden');
+});
+document.getElementById('add-task-btn').addEventListener('click', () => {
+  editingTasks.push('New Task');
+  renderEditList();
+  // Focus last input
+  const inputs = document.querySelectorAll('.edit-task-input');
+  if (inputs.length > 0) {
+    const last = inputs[inputs.length - 1];
+    last.focus();
+    last.select();
+  }
+});
+document.getElementById('save-edit').addEventListener('click', () => {
+  // Pull latest values from inputs
+  document.querySelectorAll('.edit-task-input').forEach(inp => {
+    editingTasks[parseInt(inp.dataset.idx)] = inp.value.trim() || inp.value;
+  });
+  tasks = editingTasks.filter(t => t.trim().length > 0);
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+  // Clear checks since tasks changed
+  checks = {};
+  localStorage.setItem('checks', JSON.stringify(checks));
+  renderTaskList();
+  document.getElementById('edit-modal').classList.add('hidden');
+});
+
+/* ============================================================
+   CONFETTI
+============================================================ */
+let confettiActive = false;
+function fireConfetti() {
+  if (confettiActive) return;
+  confettiActive = true;
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#ff7eb3','#a78bfa','#7ec8e3','#ffe066','#52c78a','#ffa040','#f44336','#2196f3'];
+  const pieces = Array.from({length:160}, () => ({
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    vx: (Math.random() - 0.5) * 22,
+    vy: (Math.random() - 1.2) * 18 - 4,
+    size: Math.random() * 9 + 4,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    rotation: Math.random() * 360,
+    rotSpeed: (Math.random() - 0.5) * 12,
+    shape: Math.random() > 0.5 ? 'rect' : 'circle',
+  }));
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    for (const p of pieces) {
+      p.vy += 0.45;
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.rotation += p.rotSpeed;
+      if (p.y < canvas.height + 20) alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      if (p.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+      }
+      ctx.restore();
+    }
+    if (alive) requestAnimationFrame(animate);
+    else { ctx.clearRect(0,0,canvas.width,canvas.height); confettiActive = false; }
+  }
+  animate();
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+updateNameDisplay();
+updateHourglasses();
+setInterval(updateHourglasses, 30000);
+renderTaskList();
+</script>
 </body>
 </html>
