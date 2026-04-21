@@ -194,9 +194,9 @@ const RYO_CRAWL2 = [
 /* ============================================================
    STATE & PERSISTENCE
 ============================================================ */
-const STAGE_START_MINS = 16 * 60 + 30; // 16:30
-const STAGE_END_MINS   = 21 * 60 + 30; // 21:30
-const BEDTIME_MINS     = 21 * 60;       // 21:00 = tired starts
+let STAGE_START_MINS = 16 * 60 + 30; // 16:30
+let STAGE_END_MINS   = 21 * 60 + 30; // 21:30
+let BEDTIME_MINS     = 21 * 60;       // 21:00 = tired starts
 
 const TASK_TYPES = {
   bath:    { emoji: '🛁', label: 'お風呂' },
@@ -228,10 +228,32 @@ const todayStr = new Date().toDateString();
 if (localStorage.getItem('lastDate') !== todayStr) {
   localStorage.removeItem('checks');
   localStorage.removeItem('gnChecks');
+  localStorage.removeItem('droppedIcons');
   localStorage.setItem('lastDate', todayStr);
 }
 let checks   = JSON.parse(localStorage.getItem('checks')   || '{}');
 let gnChecks = JSON.parse(localStorage.getItem('gnChecks') || '{}');
+
+let droppedIcons = JSON.parse(localStorage.getItem('droppedIcons') || '[]');
+
+function updateStageTimes() {
+  if (!targetTimeStr) targetTimeStr = '21:00';
+  const parts = targetTimeStr.split(':');
+  const th = parseInt(parts[0], 10) || 21;
+  const tm = parseInt(parts[1], 10) || 0;
+  
+  BEDTIME_MINS = th * 60 + tm;
+  STAGE_END_MINS = BEDTIME_MINS + 30;
+  STAGE_START_MINS = BEDTIME_MINS - (4 * 60 + 30);
+
+  const endH = Math.floor(STAGE_END_MINS / 60);
+  const endM = STAGE_END_MINS % 60;
+  const timebarEndEl = document.getElementById('timebar-end');
+  if (timebarEndEl) {
+    timebarEndEl.textContent = `${endH}:${endM.toString().padStart(2,'0')}まで`;
+  }
+}
+updateStageTimes();
 
 /* ============================================================
    CHARACTER STATE MACHINE
@@ -501,6 +523,9 @@ function buildStage() {
 
   redrawSprites();
   updatePositions();
+
+  // Render any persistent event icons
+  droppedIcons.forEach(renderDroppedIcon);
 }
 
 /* ============================================================
@@ -508,27 +533,27 @@ function buildStage() {
 ============================================================ */
 const TASK_EVENTS = {
   bath: async (player) => {
-    showEventPopup('🛁', 'お風呂はいった！');
+    showEventPopup('🛁', 'お風呂はいった！', player);
     await delay(600);
     showCoins();
     await delay(1500);
     playerState[player].bath = true;
     redrawSprites();
-    showEventPopup('🧴', 'パジャマに着替えた！');
+    showEventPopup('🧴', 'パジャマに着替えた！', player);
     await delay(1200);
   },
   dinner: async (player) => {
-    showEventPopup('🍽️', 'むしゃむしゃ〜！');
+    showEventPopup('🍽️', 'むしゃむしゃ〜！', player);
     await delay(600);
     showCoins();
     await delay(1500);
     playerState[player].belly = true;
     redrawSprites();
-    showEventPopup('🤰', 'おなかぱんぱん！');
+    showEventPopup('🤰', 'おなかぱんぱん！', player);
     await delay(1200);
   },
   toilet: async (player) => {
-    showEventPopup('🚽', 'トイレ完了！');
+    showEventPopup('🚽', 'トイレ完了！', player);
     await delay(600);
     showCoins();
     await delay(1500);
@@ -536,28 +561,28 @@ const TASK_EVENTS = {
     redrawSprites();
     await delay(800);
   },
-  study: async (_player) => {
-    showEventPopup('📚', 'べんきょうした！');
+  study: async (player) => {
+    showEventPopup('📚', 'べんきょうした！', player);
     await delay(600);
     showCoins();
     await delay(1200);
   },
-  exercise: async (_player) => {
-    showEventPopup('🥊', 'うりゃー！');
+  exercise: async (player) => {
+    showEventPopup('🥊', 'うりゃー！', player);
     await delay(400);
-    showEventPopup('💪', 'きたえた！');
+    showEventPopup('💪', 'きたえた！', player);
     await delay(600);
     showCoins();
     await delay(1000);
   },
-  cleanup: async (_player) => {
-    showEventPopup('🧹', 'きれいにした！');
+  cleanup: async (player) => {
+    showEventPopup('🧹', 'きれいにした！', player);
     await delay(600);
     showCoins();
     await delay(1200);
   },
-  other: async (_player) => {
-    showEventPopup('⭐', 'やったね！');
+  other: async (player) => {
+    showEventPopup('⭐', 'やったね！', player);
     await delay(500);
     showCoins();
     await delay(1000);
@@ -585,7 +610,7 @@ function delay(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-function showEventPopup(emoji, msg) {
+function showEventPopup(emoji, msg, player) {
   const layer = document.getElementById('event-layer');
   layer.innerHTML = '';
   const popup = document.createElement('div');
@@ -594,6 +619,30 @@ function showEventPopup(emoji, msg) {
   const msgEl = document.createElement('div');
   msgEl.className = 'event-msg';
   msgEl.textContent = msg;
+
+  if (player !== undefined) {
+    const charId = player === 0 ? 'char-ak' : 'char-di';
+    const charEl = document.getElementById(charId);
+    if (charEl) {
+      const rect = charEl.getBoundingClientRect();
+      const layerRect = layer.getBoundingClientRect();
+      const x = rect.left + rect.width / 2 - layerRect.left;
+      const y = rect.top - layerRect.top;
+      
+      popup.style.left = x + 'px';
+      popup.style.bottom = 'auto';
+      popup.style.top = (y - 50) + 'px';
+      
+      msgEl.style.left = x + 'px';
+      msgEl.style.bottom = 'auto';
+      msgEl.style.top = (y - 90) + 'px';
+
+      if (['🛁', '🍽️', '🚽', '🥊', '🧹'].includes(emoji)) {
+        dropEventIcon(emoji, player);
+      }
+    }
+  }
+
   layer.appendChild(popup);
   layer.appendChild(msgEl);
   setTimeout(() => {
@@ -630,6 +679,33 @@ function showCoins() {
     layer.appendChild(coin);
     setTimeout(() => coin.remove(), 1500);
   }
+}
+
+function dropEventIcon(emoji, player) {
+  const prog = timeProgress();
+  const iconData = { emoji, player, percent: prog * 100 };
+  
+  const isDuplicate = droppedIcons.some(d => d.emoji === emoji && d.player === player && Math.abs(d.percent - iconData.percent) < 1);
+  if (!isDuplicate) {
+    droppedIcons.push(iconData);
+    localStorage.setItem('droppedIcons', JSON.stringify(droppedIcons));
+    renderDroppedIcon(iconData);
+  }
+}
+
+function renderDroppedIcon(iconData) {
+  const track = document.getElementById('track');
+  if (!track) return;
+  const icon = document.createElement('div');
+  icon.textContent = iconData.emoji;
+  icon.style.position = 'absolute';
+  icon.style.bottom = iconData.player === 0 ? '10px' : '30px'; 
+  icon.style.left = iconData.percent + '%';
+  icon.style.fontSize = '1.3rem';
+  icon.style.zIndex = '5';
+  icon.style.transform = 'translateX(-50%)';
+  icon.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))';
+  track.appendChild(icon);
 }
 
 /* ============================================================
@@ -787,6 +863,8 @@ document.getElementById('save-settings').addEventListener('click', () => {
   localStorage.setItem('name1', name1);
   localStorage.setItem('name2', name2);
   updateNameDisplay();
+  updateStageTimes();
+  buildStage();
   document.getElementById('settings-modal').classList.add('hidden');
 });
 
