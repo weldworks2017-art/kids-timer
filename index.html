@@ -36,11 +36,12 @@
           <!-- task markers injected by JS -->
           <!-- characters injected by JS -->
         </div>
-      </div>
-    </div>
+      </div><!-- /stage-ground -->
+      <div class="event-layer" id="event-layer"></div>
+    </div><!-- /stage-scene -->
     <!-- Time bar -->
     <div class="stage-timebar">
-      <div class="timebar-start">16:30</div>
+      <div class="timebar-start" id="timebar-start">--:--</div>
       <div class="timebar-center">
         <div class="timebar-label">残り</div>
         <div class="timebar-value" id="time-remaining-value">--:--</div>
@@ -86,9 +87,6 @@
   </div>
 
 </div><!-- .app -->
-
-<!-- Event layer for animations -->
-<div class="event-layer" id="event-layer"></div>
 
 <!-- Confetti -->
 <canvas id="confetti-canvas"></canvas>

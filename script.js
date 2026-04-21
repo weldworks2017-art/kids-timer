@@ -5,7 +5,7 @@
    Renders characters as CSS box-shadow pixel grids.
    Each "pixel" is a colored shadow offset from a 1px div.
 ============================================================ */
-const PX = 5; // CSS pixels per "dot"
+const PX = 4; // CSS pixels per "dot"
 
 // Convert 2D color-array grid to box-shadow CSS string
 // 0 or null = transparent
@@ -71,73 +71,96 @@ const PAL_RYO = {
    Grid is 10 cols × 8 rows for RYO (crawling)
 ============================================================ */
 
-// Shared head rows for AK/DI (rows 0-6)
+// Shared head rows for AK/DI — 12 cols × 9 rows
 const HEAD = [
-  [0,0,1,1,1,1,0,0],
-  [0,1,1,1,1,1,1,0],
-  [0,1,2,2,2,2,1,0],
-  [0,1,2,3,2,3,1,0],
-  [0,1,2,2,2,2,1,0],
-  [0,1,2,4,2,4,1,0],
-  [0,0,1,1,1,1,0,0],
+  [0,0,0,1,1,1,1,1,1,0,0,0],
+  [0,0,1,1,1,1,1,1,1,1,0,0],
+  [0,1,1,1,2,2,2,2,1,1,1,0],
+  [0,1,2,2,2,2,2,2,2,2,1,0],
+  [0,1,2,3,2,2,2,2,3,2,1,0],
+  [0,1,2,2,2,2,2,2,2,2,1,0],
+  [0,1,2,4,2,2,2,2,4,2,1,0],
+  [0,1,2,2,4,2,2,4,2,2,1,0],
+  [0,0,1,1,1,1,1,1,1,1,0,0],
 ];
 const HEAD_TIRED = [
-  [0,0,1,1,1,1,0,0],
-  [0,1,1,1,1,1,1,0],
-  [0,1,'G','G','G','G',1,0],
-  [0,1,'G',3,'G',3,1,0],
-  [0,1,'G','G','G','G',1,0],
-  [0,1,'G','G','G','G',1,0],
-  [0,0,1,1,1,1,0,0],
+  [0,0,0,1,1,1,1,1,1,0,0,0],
+  [0,0,1,1,1,1,1,1,1,1,0,0],
+  [0,1,1,1,'G','G','G','G',1,1,1,0],
+  [0,1,'G','G','G','G','G','G','G','G',1,0],
+  [0,1,'G',3,'G','G','G','G',3,'G',1,0],
+  [0,1,'G','G','G','G','G','G','G','G',1,0],
+  [0,1,'G','G','G','G','G','G','G','G',1,0],
+  [0,1,'G','G','G','G','G','G','G','G',1,0],
+  [0,0,1,1,1,1,1,1,1,1,0,0],
 ];
 
-// Body rows for normal shirt (rows 7-10)
+// Body rows — 12 cols × 5 rows
 const BODY = (shirt) => [
-  [0,0,shirt,shirt,shirt,shirt,0,0],
-  [0,shirt,shirt,shirt,shirt,shirt,shirt,0],
-  [0,shirt,shirt,shirt,shirt,shirt,shirt,0],
-  [0,shirt,shirt,shirt,shirt,shirt,shirt,0],
+  [0,0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0,0],
+  [0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0],
+  [0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0],
+  [0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0],
+  [0,0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0,0],
 ];
 
-// Belly body (after dinner - bulge row added)
+// Belly body — wide middle row
 const BODY_BELLY = (shirt) => [
-  [0,0,shirt,shirt,shirt,shirt,0,0],
-  [0,shirt,shirt,shirt,shirt,shirt,shirt,0],
-  [shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt],  // wide belly
-  [0,shirt,shirt,shirt,shirt,shirt,shirt,0],
+  [0,0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0,0],
+  [0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0],
+  [shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt],
+  [0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0],
+  [0,0,shirt,shirt,shirt,shirt,shirt,shirt,shirt,shirt,0,0],
 ];
 
 // Pajama body
 const BODY_PAJAMA = [
-  [0,0,8,8,8,8,0,0],
-  [0,8,8,8,8,8,8,0],
-  [0,8,8,9,9,8,8,0],
-  [0,8,8,8,8,8,8,0],
+  [0,0,8,8,8,8,8,8,8,8,0,0],
+  [0,8,8,8,8,8,8,8,8,8,8,0],
+  [0,8,8,8,9,9,9,9,8,8,8,0],
+  [0,8,8,8,8,8,8,8,8,8,8,0],
+  [0,0,8,8,8,8,8,8,8,8,0,0],
 ];
 
 // Pajama + belly
 const BODY_PAJAMA_BELLY = [
-  [0,0,8,8,8,8,0,0],
-  [0,8,8,8,8,8,8,0],
-  [8,8,8,9,9,8,8,8],
-  [0,8,8,8,8,8,8,0],
+  [0,0,8,8,8,8,8,8,8,8,0,0],
+  [0,8,8,8,8,8,8,8,8,8,8,0],
+  [8,8,8,8,9,9,9,9,8,8,8,8],
+  [0,8,8,8,8,8,8,8,8,8,8,0],
+  [0,0,8,8,8,8,8,8,8,8,0,0],
 ];
 
-// Pants row (row 11, shared)
-const PANTS = [[0,6,6,0,0,6,6,0]];
+// Pants — 12 cols × 2 rows
+const PANTS = [
+  [0,0,6,6,6,6,6,6,6,6,0,0],
+  [0,6,6,6,0,0,0,0,6,6,6,0],
+];
 
-// Leg frames
-const LEGS_W1 = [[7,7,0,0,0,6,6,0]]; // left foot forward
-const LEGS_W2 = [[6,6,0,0,0,7,7,0]]; // right foot forward
-const LEGS_TIRED_W1 = [[0,7,7,0,0,6,0,0]]; // shuffling
-const LEGS_TIRED_W2 = [[0,6,0,0,0,7,7,0]];
+// Leg frames — 12 cols × 2 rows each
+const LEGS_W1 = [
+  [0,7,7,7,0,0,0,0,0,6,6,0],
+  [7,7,7,0,0,0,0,0,6,6,6,0],
+];
+const LEGS_W2 = [
+  [0,6,6,0,0,0,0,0,0,7,7,0],
+  [0,6,6,6,0,0,0,0,7,7,7,0],
+];
+const LEGS_TIRED_W1 = [
+  [0,0,7,7,0,0,0,0,6,6,0,0],
+  [0,7,7,0,0,0,0,0,0,6,6,0],
+];
+const LEGS_TIRED_W2 = [
+  [0,0,6,6,0,0,0,0,7,7,0,0],
+  [0,6,6,0,0,0,0,0,0,7,7,0],
+];
 
-// Sleeping pose (lying down, 12 wide × 4 tall)
+// Sleeping pose (lying down, 16 wide × 4 tall)
 const SLEEPING_GRID = [
-  [0,0,1,1,1,1,0,0,0,0,0,0],
-  [0,1,2,2,2,2,1,0,0,0,0,0],
-  [0,1,2,3,2,2,1,5,5,5,5,0],  // head + body horizontal
-  [0,0,1,1,1,1,0,6,6,6,7,7],  // chin + legs + shoes
+  [0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0],
+  [0,0,1,2,2,2,2,2,1,0,0,0,0,0,0,0],
+  [0,0,1,2,3,2,2,2,1,5,5,5,5,5,5,0],
+  [0,0,0,1,1,1,1,1,0,6,6,6,6,7,7,7],
 ];
 
 // Assemble a full grid from parts
@@ -169,34 +192,40 @@ function getCharGrid(state, frame) {
   }
 }
 
-/* RYO crawling frames (10 cols × 8 rows) */
+/* RYO crawling frames (12 cols × 10 rows) */
 const RYO_CRAWL1 = [
-  [0,0,1,1,1,0,0,0,0,0],
-  [0,1,2,2,2,1,0,0,0,0],
-  [0,1,2,3,2,1,0,0,0,0],
-  [0,0,1,1,1,0,0,0,0,0],
-  [0,5,5,5,5,5,0,0,0,0], // body
-  [2,5,5,5,5,5,5,2,0,0], // arms out + end of body
-  [0,2,0,0,0,0,2,0,0,0], // hands/knees
-  [0,0,0,0,0,5,5,0,0,0], // back feet
+  [0,0,0,1,1,1,0,0,0,0,0,0],
+  [0,0,1,2,2,2,1,0,0,0,0,0],
+  [0,0,1,2,3,2,1,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0],
+  [0,0,5,5,5,5,5,0,0,0,0,0],
+  [0,5,5,5,5,5,5,5,0,0,0,0],
+  [2,5,5,5,5,5,5,5,2,0,0,0],
+  [0,2,0,0,0,0,0,2,0,0,0,0],
+  [0,0,0,0,0,5,5,5,0,0,0,0],
+  [0,0,0,0,5,5,0,0,0,0,0,0],
 ];
 const RYO_CRAWL2 = [
-  [0,0,1,1,1,0,0,0,0,0],
-  [0,1,2,2,2,1,0,0,0,0],
-  [0,1,2,3,2,1,0,0,0,0],
-  [0,0,1,1,1,0,0,0,0,0],
-  [0,5,5,5,5,5,0,0,0,0],
-  [0,2,5,5,5,5,2,0,0,0], // arms slightly different
-  [2,0,0,0,0,0,0,2,0,0],
-  [0,5,5,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0],
+  [0,0,1,2,2,2,1,0,0,0,0,0],
+  [0,0,1,2,3,2,1,0,0,0,0,0],
+  [0,0,0,1,1,1,0,0,0,0,0,0],
+  [0,0,5,5,5,5,5,0,0,0,0,0],
+  [0,5,5,5,5,5,5,5,0,0,0,0],
+  [0,2,5,5,5,5,5,5,2,0,0,0],
+  [2,0,0,0,0,0,0,0,2,0,0,0],
+  [0,5,5,5,0,0,0,0,0,0,0,0],
+  [0,0,0,5,5,0,0,0,0,0,0,0],
 ];
 
 /* ============================================================
    STATE & PERSISTENCE
 ============================================================ */
-const STAGE_START_MINS = 16 * 60 + 30; // 16:30
-const STAGE_END_MINS   = 21 * 60 + 30; // 21:30
-const BEDTIME_MINS     = 21 * 60;       // 21:00 = tired starts
+function getStageConfig() {
+  const [th, tm] = targetTimeStr.split(':').map(Number);
+  const bedMins = th * 60 + tm;
+  return { startMins: bedMins - 270, endMins: bedMins + 30, bedMins };
+}
 
 const TASK_TYPES = {
   bath:    { emoji: '🛁', label: 'お風呂' },
@@ -346,12 +375,14 @@ function redrawSprites() {
 ============================================================ */
 function nowMins() {
   const n = new Date();
-  return n.getHours() * 60 + n.getMinutes();
+  // 秒単位の小数を含めることで滑らかに進む
+  return n.getHours() * 60 + n.getMinutes() + n.getSeconds() / 60;
 }
 
 function timeProgress() {
-  const total = STAGE_END_MINS - STAGE_START_MINS; // 300
-  const elapsed = Math.max(0, Math.min(total, nowMins() - STAGE_START_MINS));
+  const { startMins, endMins } = getStageConfig();
+  const total = endMins - startMins;
+  const elapsed = Math.max(0, Math.min(total, nowMins() - startMins));
   return elapsed / total;
 }
 
@@ -384,22 +415,34 @@ function updatePositions() {
 }
 
 function updateTimebar() {
+  const { startMins, endMins } = getStageConfig();
+  // Update start label
+  const startEl = document.getElementById('timebar-start');
+  if (startEl) {
+    const sh = Math.floor(startMins / 60), sm = startMins % 60;
+    startEl.textContent = `${sh}:${sm.toString().padStart(2, '0')}`;
+  }
+  // Update end label
+  const endEl = document.getElementById('timebar-end');
+  if (endEl) {
+    const eh = Math.floor(endMins / 60), em = endMins % 60;
+    endEl.textContent = `${eh}:${em.toString().padStart(2, '0')}まで`;
+  }
+  // Remaining time countdown
   const now = new Date();
   const [th, tm] = targetTimeStr.split(':').map(Number);
   const target = new Date();
   target.setHours(th, tm, 0, 0);
   if (target < now) target.setDate(target.getDate() + 1);
-
   const diffMins = Math.max(0, Math.floor((target - now) / 60000));
   const valEl = document.getElementById('time-remaining-value');
   if (!valEl) return;
-
   if (diffMins <= 0) {
     valEl.textContent = '0:00';
   } else {
     const h = Math.floor(diffMins / 60);
     const m = diffMins % 60;
-    valEl.textContent = h > 0 ? `${h}時間${m.toString().padStart(2,'0')}分` : `${m}分`;
+    valEl.textContent = h > 0 ? `${h}時間${m.toString().padStart(2, '0')}分` : `${m}分`;
   }
 }
 
@@ -431,7 +474,7 @@ function updateTiredState() {
   const mins = nowMins();
   const overlay = document.getElementById('tired-overlay');
   if (!overlay) return;
-  if (mins >= BEDTIME_MINS) {
+  if (mins >= getStageConfig().bedMins) {
     overlay.classList.add('active');
     playerState[0].tired = !playerState[0].sleeping;
     playerState[1].tired = !playerState[1].sleeping;
@@ -451,8 +494,9 @@ function buildStage() {
   pline.id = 'progress-line';
   track.appendChild(pline);
 
-  // Bed marker at 21:00 (= 270/300 = 90% of 5h range)
-  const bedPct = ((BEDTIME_MINS - STAGE_START_MINS) / (STAGE_END_MINS - STAGE_START_MINS)) * 100;
+  // Bed marker position based on dynamic config
+  const { startMins, endMins, bedMins } = getStageConfig();
+  const bedPct = ((bedMins - startMins) / (endMins - startMins)) * 100;
   const bedMarker = document.createElement('div');
   bedMarker.className = 'bed-marker';
   bedMarker.style.left = bedPct + '%';
@@ -508,27 +552,27 @@ function buildStage() {
 ============================================================ */
 const TASK_EVENTS = {
   bath: async (player) => {
-    showEventPopup('🛁', 'お風呂はいった！');
+    showEventPopup('🛁', 'お風呂はいった！', player);
     await delay(600);
     showCoins();
     await delay(1500);
     playerState[player].bath = true;
     redrawSprites();
-    showEventPopup('🧴', 'パジャマに着替えた！');
+    showEventPopup('🧴', 'パジャマに着替えた！', player);
     await delay(1200);
   },
   dinner: async (player) => {
-    showEventPopup('🍽️', 'むしゃむしゃ〜！');
+    showEventPopup('🍽️', 'むしゃむしゃ〜！', player);
     await delay(600);
     showCoins();
     await delay(1500);
     playerState[player].belly = true;
     redrawSprites();
-    showEventPopup('🤰', 'おなかぱんぱん！');
+    showEventPopup('🤰', 'おなかぱんぱん！', player);
     await delay(1200);
   },
   toilet: async (player) => {
-    showEventPopup('🚽', 'トイレ完了！');
+    showEventPopup('🚽', 'トイレ完了！', player);
     await delay(600);
     showCoins();
     await delay(1500);
@@ -536,28 +580,28 @@ const TASK_EVENTS = {
     redrawSprites();
     await delay(800);
   },
-  study: async (_player) => {
-    showEventPopup('📚', 'べんきょうした！');
+  study: async (player) => {
+    showEventPopup('📚', 'べんきょうした！', player);
     await delay(600);
     showCoins();
     await delay(1200);
   },
-  exercise: async (_player) => {
-    showEventPopup('🥊', 'うりゃー！');
+  exercise: async (player) => {
+    showEventPopup('🥊', 'うりゃー！', player);
     await delay(400);
-    showEventPopup('💪', 'きたえた！');
+    showEventPopup('💪', 'きたえた！', player);
     await delay(600);
     showCoins();
     await delay(1000);
   },
-  cleanup: async (_player) => {
-    showEventPopup('🧹', 'きれいにした！');
+  cleanup: async (player) => {
+    showEventPopup('🧹', 'きれいにした！', player);
     await delay(600);
     showCoins();
     await delay(1200);
   },
-  other: async (_player) => {
-    showEventPopup('⭐', 'やったね！');
+  other: async (player) => {
+    showEventPopup('⭐', 'やったね！', player);
     await delay(500);
     showCoins();
     await delay(1000);
@@ -565,13 +609,13 @@ const TASK_EVENTS = {
 };
 
 const GOODNIGHT_EVENT = async (player) => {
-  showEventPopup('🛏️', 'おやすみ〜！');
+  showEventPopup('🛏️', 'おやすみ〜！', player);
   await delay(600);
   playerState[player].sleeping = true;
   playerState[player].tired = false;
   redrawSprites();
   await delay(1000);
-  const early = nowMins() < BEDTIME_MINS;
+  const early = nowMins() < getStageConfig().bedMins;
   if (early) showEventMsg('⭐ はやね！えらい！');
   await delay(1500);
 };
@@ -585,24 +629,31 @@ function delay(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-function showEventPopup(emoji, msg) {
+function getCharXPct(player) {
+  const track = document.getElementById('track');
+  if (!track) return 50;
+  const id = player === 0 ? 'char-ak' : 'char-di';
+  const el = document.getElementById(id);
+  if (!el) return 50;
+  const pct = (parseFloat(el.style.left) || 0) / track.offsetWidth * 100;
+  return Math.min(88, Math.max(12, pct));
+}
+
+function showEventPopup(emoji, msg, player) {
   const layer = document.getElementById('event-layer');
   layer.innerHTML = '';
+  const xPct = (player !== undefined) ? getCharXPct(player) : 50;
   const popup = document.createElement('div');
   popup.className = 'event-popup';
+  popup.style.setProperty('--popup-x', xPct + '%');
   popup.textContent = emoji;
   const msgEl = document.createElement('div');
   msgEl.className = 'event-msg';
+  msgEl.style.setProperty('--popup-x', xPct + '%');
   msgEl.textContent = msg;
   layer.appendChild(popup);
   layer.appendChild(msgEl);
-  setTimeout(() => {
-    popup.style.transition = 'opacity 0.5s';
-    popup.style.opacity = '0';
-    msgEl.style.transition = 'opacity 0.5s';
-    msgEl.style.opacity = '0';
-    setTimeout(() => layer.innerHTML = '', 600);
-  }, 1800);
+  // No fade-out timer — popup stays until next one replaces it
 }
 
 function showEventMsg(msg) {
@@ -787,6 +838,8 @@ document.getElementById('save-settings').addEventListener('click', () => {
   localStorage.setItem('name1', name1);
   localStorage.setItem('name2', name2);
   updateNameDisplay();
+  buildStage();
+  updatePositions();
   document.getElementById('settings-modal').classList.add('hidden');
 });
 
@@ -952,7 +1005,7 @@ function restorePlayerStates() {
   [0, 1].forEach(p => {
     if (gnChecks[p]) playerState[p].sleeping = true;
   });
-  if (nowMins() >= BEDTIME_MINS) {
+  if (nowMins() >= getStageConfig().bedMins) {
     playerState.forEach(s => { if (!s.sleeping) s.tired = true; });
   }
 }
@@ -979,8 +1032,8 @@ requestAnimationFrame(() => {
   });
 });
 
-// Position update loop (every minute)
-setInterval(updatePositions, 60000);
+// Position update loop (every 5 seconds for smooth movement)
+setInterval(updatePositions, 5000);
 
 // Sprite walk animation loop
 requestAnimationFrame(tick);
